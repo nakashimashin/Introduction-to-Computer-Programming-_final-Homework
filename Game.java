@@ -267,6 +267,7 @@ class Player extends Actor {
 
 class Monster extends Actor {
     static final int INIT_HP = 150;
+    protected Image image = Toolkit.getDefaultToolkit().getImage("Monster.png");
 
     Monster(Game game) { super(game, INIT_HP); }
 
@@ -280,7 +281,7 @@ class Monster extends Actor {
     void giveDamageTo(Player p) { p.hp -= 30; }
 
     @Override
-    void giveDamageTo(RedMonster r) { r.hp -= 5; }
+    void giveDamageTo(Monster m) { m.hp -= 5; }
 
     @Override
     void action() {
@@ -292,32 +293,49 @@ class Monster extends Actor {
         }
     }
 
-    static final Image image = Toolkit.getDefaultToolkit().getImage("Monster.png");
-
     @Override
     Image getImage() { return image; }
 }
 
 class RedMonster extends Monster {
-    RedMonster(Game game) { super(game); }
+    private boolean isTransformed = false;
+
+    RedMonster(Game game) {
+        super(game);
+        this.hp = INIT_HP;
+    }
 
     @Override
-    public String toString() { return "Red" + super.toString(); }
+    public String toString() {
+        return "Red" + super.toString();
+    }
 
     @Override
-    void takeDamageFrom(Actor a) { a.giveDamageTo(this); }
+    void takeDamageFrom(Actor a) {
+        super.takeDamageFrom(a);
+        if (this.hp <= INIT_HP * 2 / 3 && !isTransformed) {
+            this.isTransformed = true;
+            this.image = Toolkit.getDefaultToolkit().getImage("RedMonster.png");
+        }
+        else if (this.hp <= INIT_HP / 3) {
+            this.isTransformed = false;
+            this.image = Toolkit.getDefaultToolkit().getImage("Monster.png");
+        }
+    }
 
     @Override
-    void giveDamageTo(Player p) { p.hp -= 60; }
+    void giveDamageTo(Player p) {
+        if (isTransformed) {
+            p.hp -= 80;
+        } else {
+            p.hp -= 60;
+        }
+    }
 
     @Override
     void giveDamageTo(Monster m) { m.hp -= 7; }
-
-    static final Image image = Toolkit.getDefaultToolkit().getImage("RedMonster.png");
-
-    @Override
-    Image getImage() { return image; }
 }
+
 
 class Int2 {
     int x, y;
